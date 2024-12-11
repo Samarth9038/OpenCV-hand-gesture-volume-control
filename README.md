@@ -25,3 +25,10 @@ This program utilizes hand gesture recognition with [MediaPipe](https://github.c
   **Step-4:** Once the virtual environment is set up, the runMe.bat file will automatically execute the program. To run the program again, simply execute the runMe.bat file.
 
   To terminate, close the command prompt window.
+
+  # How to Use
+  A camera window will open for initial configuration. It is highly recommended to configure the system for the first use.
+
+  Press the 'n' key to exit the configuration phase.
+
+  Once configured, position your hand over the webcam and use your index finger and thumb to control the volume.
