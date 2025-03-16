@@ -7,6 +7,7 @@ import pandas as pd
 import regress as rg
 
 noNew = True
+
 def dataCollect(capdevice=0, point=[0], drawHand=True, drawPoint=True,):
         cap = cv2.VideoCapture(capdevice)
         detector = htm.hDetector()
@@ -34,7 +35,6 @@ def dataCollect(capdevice=0, point=[0], drawHand=True, drawPoint=True,):
                                 rest.append(distance)
                         else:
                                 arr = np.array(rest)
-                                # print(rg.call(int(round(np.mean(arr),2)*100)))
                                 if prompt:
                                         if time.time() - lastime > 3:
                                                 speak = "Analyzing.."
@@ -67,7 +67,7 @@ def dataCollect(capdevice=0, point=[0], drawHand=True, drawPoint=True,):
                 cv2.putText(img, speak, (10,200), cv2.FONT_HERSHEY_SIMPLEX, 1, (200, 255, 5), 3)
                 key = cv2.waitKey(1)
                 if key == ord('y'):
-                        noNew = True
+                        noNew = False
                         speak = "close index finger and thumb"
                         prompt = True
                         lastime = time.time()
@@ -89,17 +89,27 @@ def dataCollect(capdevice=0, point=[0], drawHand=True, drawPoint=True,):
                 cv2.waitKey(1)
         return[lowData, midData,highData]
 
+def remOut(data, threshold=1.5):
+    if len(data) == 0:
+        return np.array([])
+    q1 = np.percentile(data, 25)
+    q3 = np.percentile(data, 75)
+    iqr = q3 - q1
+    lower_bound = q1 - threshold * iqr
+    upper_bound = q3 + threshold * iqr
+    return data[(data >= lower_bound) & (data <= upper_bound)]
 
 
 cam = 0
 
 data = dataCollect(point=[4,8], capdevice=cam)
-
+values = [0, 0.5, 1]
 
 if not noNew:
-        df1 = pd.DataFrame([(x,0) for x in data[0]])
-        df2 = pd.DataFrame([(x,0.5) for x in data[1]])
-        df3 = pd.DataFrame([(x,1) for x in data[2]])
-        pd.concat([df1,df2,df3]).to_csv('allData.csv', index=False, header = False)
+        cleaned = []
+        for arr in data:
+                cleaned.append(remOut(np.array(arr, dtype=float)))
+        df1 = pd.DataFrame([(x, values[i]) for i in range(len(cleaned)) for x in cleaned[i]], columns=['dist', 'val'])
+        df1.to_csv('allData.csv')
         rg.newWeights()
 htm.run(point=[4,8], capdevice= cam)
